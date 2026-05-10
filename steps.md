@@ -51,3 +51,5 @@ Re-model the dynamic mouvment of the missle to include drag and thrust behaviour
 add contol to the missle by controlling thrust vectors in each output, the control will behave through time taking in consideration the missle vector, thrust vector, speed(if necessare), and target.
 
 
+
+

@@ -2,14 +2,16 @@
 inputs.py
 ---------
 Handles all user input prompts.
-One function per group of inputs — position, velocity, direction, mass, engine.
+One function per group of inputs — position, velocity, orientation, mass, engine.
 """
 
 from config import (
     DEFAULT_X0, DEFAULT_Y0, DEFAULT_Z0,
     DEFAULT_VX0, DEFAULT_VY0, DEFAULT_VZ0,
+    DEFAULT_WX0, DEFAULT_WY0, DEFAULT_WZ0,
     DEFAULT_ELEVATION, DEFAULT_AZIMUTH,
     DEFAULT_DRY_MASS, DEFAULT_FUEL_MASS,
+    DEFAULT_LENGTH, DEFAULT_RADIUS,
     DEFAULT_MAX_THRUST, DEFAULT_BURN_RATE
 )
 
@@ -49,9 +51,18 @@ def ask_velocity():
     return vx0, vy0, vz0
 
 
-def ask_thrust_direction():
+def ask_angular_velocity():
+    """Ask for initial angular velocity in rad/s."""
+    print("\n── Initial Angular Velocity (rad/s) ──")
+    wx0 = ask_float("wx0  (around world x)", DEFAULT_WX0)
+    wy0 = ask_float("wy0  (around world y)", DEFAULT_WY0)
+    wz0 = ask_float("wz0  (around world z)", DEFAULT_WZ0)
+    return wx0, wy0, wz0
+
+
+def ask_body_orientation():
     """
-    Ask for elevation and azimuth angles that define thrust direction.
+    Ask for elevation and azimuth angles that define body orientation.
 
     elevation — angle above horizontal
         90 = straight up
@@ -64,12 +75,17 @@ def ask_thrust_direction():
         180 = along -x axis
         270 = along -y axis
     """
-    print("\n── Thrust Direction ──")
+    print("\n── Body Orientation ──")
     print("  elevation : 90=straight up | 45=diagonal | 0=horizontal")
     print("  azimuth   : 0=+x | 90=+y | 180=-x | 270=-y")
     elevation = ask_float("elevation angle (degrees)", DEFAULT_ELEVATION)
     azimuth   = ask_float("azimuth   angle (degrees)", DEFAULT_AZIMUTH)
     return elevation, azimuth
+
+
+def ask_thrust_direction():
+    """Backward-compatible name for the body orientation prompt."""
+    return ask_body_orientation()
 
 
 def ask_mass():
@@ -78,6 +94,14 @@ def ask_mass():
     m_dry  = ask_float("Dry mass  (kg, missile body without fuel)", DEFAULT_DRY_MASS)
     m_fuel = ask_float("Fuel mass (kg, at launch)",                 DEFAULT_FUEL_MASS)
     return m_dry, m_fuel
+
+
+def ask_body_shape():
+    """Ask for the simplified cylindrical rocket shape."""
+    print("\n── Rocket Body Shape ──")
+    length = ask_float("Length (m)", DEFAULT_LENGTH)
+    radius = ask_float("Radius (m)", DEFAULT_RADIUS)
+    return length, radius
 
 
 def ask_engine():

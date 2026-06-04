@@ -1,0 +1,12 @@
+[
+  {
+    "id": "g1",
+    "name": "Trip to Paris",
+    "memberIds": ["u1", "u2", "u3"]
+  },
+  {
+    "id": "g2",
+    "name": "Apartment Bills",
+    "memberIds": ["u1", "u2"]
+  }
+]

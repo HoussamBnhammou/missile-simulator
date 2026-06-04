@@ -1,19 +1,19 @@
 """
 guidance.py
 -----------
-Determines the thrust DIRECTION at every timestep.
+Determines the missile body ORIENTATION at every timestep.
 
 This is completely separate from thrust MAGNITUDE (that lives in physics.py).
-Direction and magnitude are two different things:
+Orientation and magnitude are two different things:
   - magnitude = how hard the engine pushes  (physics.py)
-  - direction = where it pushes toward      (this file)
+  - orientation = where the nose points     (this file)
 
 Current mode: FIXED DIRECTION
     The missile points at a fixed elevation and azimuth set at launch.
     Direction never changes during flight.
 
 Future upgrade — GUIDED MODE:
-    Replace the internals of get_thrust_vector() with a guidance law.
+    Replace the internals of get_orientation_vector() with a guidance law.
     The function already receives time and full missile state,
     so a guidance law can use position and velocity to steer toward a target.
 
@@ -25,6 +25,8 @@ Future upgrade — GUIDED MODE:
 """
 
 import numpy as np
+from rocket_body import LOCAL_NOSE_AXIS, nose_axis_world
+from vectors import quaternion_from_vectors
 
 
 def angles_to_unit_vector(elevation_deg, azimuth_deg):
@@ -37,9 +39,9 @@ def angles_to_unit_vector(elevation_deg, azimuth_deg):
         tz = sin(elevation)                  ← z (vertical) component
 
     Sanity check:
-        elevation=90, any azimuth → vector = (0, 0, 1) = straight up   ✅
-        elevation=0,  azimuth=0   → vector = (1, 0, 0) = along x-axis  ✅
-        elevation=0,  azimuth=90  → vector = (0, 1, 0) = along y-axis  ✅
+        elevation=90, any azimuth → vector = (0, 0, 1) = straight up
+        elevation=0,  azimuth=0   → vector = (1, 0, 0) = along x-axis
+        elevation=0,  azimuth=90  → vector = (0, 1, 0) = along y-axis
 
     Returned vector always has magnitude = 1.0
     """
@@ -53,12 +55,20 @@ def angles_to_unit_vector(elevation_deg, azimuth_deg):
     return np.array([tx, ty, tz])
 
 
-def get_thrust_vector(t, state, elevation_deg, azimuth_deg):
+def initial_orientation_quaternion(elevation_deg, azimuth_deg):
+    """Create the launch quaternion from elevation and azimuth angles."""
+    return quaternion_from_vectors(
+        LOCAL_NOSE_AXIS,
+        angles_to_unit_vector(elevation_deg, azimuth_deg),
+    )
+
+
+def get_orientation_vector(t, state, elevation_deg, azimuth_deg):
     """
-    Returns the thrust direction unit vector at time t.
+    Returns the missile orientation unit vector at time t.
 
     Called at EVERY timestep dt during the simulation loop.
-    This is where the missile decides which way to point its engine.
+    This is where the missile decides which way to point its nose/body axis.
 
     Parameters:
         t             — current simulation time (seconds)
@@ -67,7 +77,7 @@ def get_thrust_vector(t, state, elevation_deg, azimuth_deg):
         azimuth_deg   — launch azimuth angle (degrees)
 
     Returns:
-        np.array([tx, ty, tz]) — unit vector, magnitude always = 1.0
+        np.array([ox, oy, oz]) — unit vector, magnitude always = 1.0
 
     ┌──────────────────────────────────────────────────────────────┐
     │  GUIDANCE HOOK — this is where Project 3 plugs in           │
@@ -81,5 +91,12 @@ def get_thrust_vector(t, state, elevation_deg, azimuth_deg):
     │  Everything else in the simulator stays exactly the same.   │
     └──────────────────────────────────────────────────────────────┘
     """
-    # current mode: fixed direction regardless of t or state
+    if len(state) >= 10:
+        return nose_axis_world(state[6:10])
+
     return angles_to_unit_vector(elevation_deg, azimuth_deg)
+
+
+def get_thrust_vector(t, state, elevation_deg, azimuth_deg):
+    """Backward-compatible name for code that still asks for thrust direction."""
+    return get_orientation_vector(t, state, elevation_deg, azimuth_deg)

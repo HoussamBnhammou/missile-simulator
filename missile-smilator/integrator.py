@@ -25,15 +25,46 @@ RK4 formula:
 """
 
 import numpy as np
-from physics import compute_accelerations
+from physics import compute_dynamics
+from vectors import quaternion_derivative, quaternion_normalize
 
 
-def state_derivative(state, t, thrust_vec, T_max, k, m_dry, m_fuel):
+def position_from_state(state):
+    """Extract position [x, y, z] from the translational state."""
+    return state[0:3]
+
+
+def velocity_from_state(state):
+    """Extract velocity [vx, vy, vz] from the translational state."""
+    return state[3:6]
+
+
+def orientation_from_state(state):
+    """Extract quaternion [q0, q1, q2, q3] from the rigid-body state."""
+    return quaternion_normalize(state[6:10])
+
+
+def angular_velocity_from_state(state):
+    """Extract angular velocity [wx, wy, wz] from the rigid-body state."""
+    return state[10:13]
+
+
+def normalize_state_orientation(state):
+    """Keep the quaternion part of state unit-length after integration."""
+    normalized = state.copy()
+    normalized[6:10] = quaternion_normalize(normalized[6:10])
+    return normalized
+
+
+def state_derivative(state, t, body, T_max, k, m_dry, m_fuel):
     """
     Compute the rate of change of the full state vector.
 
-    State vector:  [x,  y,  z,  vx,  vy,  vz]
-    Derivative:    [vx, vy, vz, ax,  ay,  az]
+    State:
+        [x, y, z, vx, vy, vz, q0, q1, q2, q3, wx, wy, wz]
+
+    Derivative:
+        [vx, vy, vz, ax, ay, az, q0_dot, q1_dot, q2_dot, q3_dot, ax_rot, ay_rot, az_rot]
 
     Meaning:
         dx/dt  = vx   (position changes at the rate of velocity)
@@ -42,19 +73,26 @@ def state_derivative(state, t, thrust_vec, T_max, k, m_dry, m_fuel):
         dvx/dt = ax   (velocity changes at the rate of acceleration)
         dvy/dt = ay
         dvz/dt = az
+        dq/dt  = quaternion derivative from angular velocity
+        dw/dt  = angular acceleration from torque and inertia
     """
-    x,  y,  z  = state[0], state[1], state[2]
-    vx, vy, vz = state[3], state[4], state[5]
-
-    ax, ay, az = compute_accelerations(
-        t, vx, vy, vz, thrust_vec,
-        T_max, k, m_dry, m_fuel
+    velocity_vec = velocity_from_state(state)
+    orientation = orientation_from_state(state)
+    angular_velocity = angular_velocity_from_state(state)
+    dynamics = compute_dynamics(
+        t, velocity_vec, orientation, angular_velocity,
+        body, T_max, k, m_dry, m_fuel
     )
 
-    return np.array([vx, vy, vz, ax, ay, az])
+    return np.concatenate((
+        velocity_vec,
+        dynamics['linear_acceleration'],
+        quaternion_derivative(orientation, angular_velocity),
+        dynamics['angular_acceleration'],
+    ))
 
 
-def rk4_step(state, t, dt, thrust_vec, T_max, k, m_dry, m_fuel):
+def rk4_step(state, t, dt, body, T_max, k, m_dry, m_fuel):
     """
     Advance the missile state by one time step dt using RK4.
 
@@ -66,11 +104,13 @@ def rk4_step(state, t, dt, thrust_vec, T_max, k, m_dry, m_fuel):
 
     Returns the new state after dt seconds.
     """
-    args = (thrust_vec, T_max, k, m_dry, m_fuel)
+    args = (body, T_max, k, m_dry, m_fuel)
 
     k1 = state_derivative(state,               t,           *args)
     k2 = state_derivative(state + 0.5*dt*k1,   t + 0.5*dt,  *args)
     k3 = state_derivative(state + 0.5*dt*k2,   t + 0.5*dt,  *args)
     k4 = state_derivative(state +     dt*k3,   t +     dt,  *args)
 
-    return state + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+    return normalize_state_orientation(
+        state + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+    )

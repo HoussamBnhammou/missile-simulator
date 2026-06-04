@@ -1,0 +1,46 @@
+[
+  {
+    "id": "e1",
+    "groupId": "g1",
+    "title": "Hotel",
+    "amount": 300,
+    "paidBy": "u1",
+    "date": "2026-06-04",
+    "participants": [
+      {
+        "userId": "u1",
+        "share": 100
+      },
+      {
+        "userId": "u2",
+        "share": 100
+      },
+      {
+        "userId": "u3",
+        "share": 100
+      }
+    ]
+  },
+  {
+    "id": "e2",
+    "groupId": "g1",
+    "title": "Dinner",
+    "amount": 90,
+    "paidBy": "u2",
+    "date": "2026-06-04",
+    "participants": [
+      {
+        "userId": "u1",
+        "share": 30
+      },
+      {
+        "userId": "u2",
+        "share": 30
+      },
+      {
+        "userId": "u3",
+        "share": 30
+      }
+    ]
+  }
+]

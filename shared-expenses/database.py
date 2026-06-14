@@ -1,61 +1,51 @@
-import oracledb
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from flask_sqlalchemy import SQLAlchemy
+
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
-pool = None
+db = SQLAlchemy()
+SCHEMA_NAME = os.getenv("SCHEMA_NAME")
+
 
 ##these next 2 functions are not related to the db connection but rather just to resolve the env variables form .env file.
-def _required_env(name):
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(f"Missing required environment variable: {name}")
-    return value
+## this is good for debugging, we should catch if the credential exist or not otherwise. you will get just a vague  db connection failure
+def _required_env(*names):
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    raise RuntimeError(f"Missing required environment variable: {' or '.join(names)}")
 
-
-def _resolve_path_from_env(name):
-    path = Path(_required_env(name)).expanduser()
+## resolvine the path of the wallet, in production we should fetch it directly from a vault.
+def _resolve_path_from_env(*names):
+    path = Path(_required_env(*names)).expanduser()
     if not path.is_absolute():
         path = BASE_DIR / path
     return path.resolve()
+#############################################
 
 
-def init_db_pool():
-    global pool
-    wallet_dir = _resolve_path_from_env("TNS_ADMIN")
-    wallet_password = os.getenv("WALLET_PASSWORD") or None
+## the database connection engine is stored in the flask app instanciation thanks to the library flask_sqlalchemy/
+def configure_database(app):
+    wallet_dir = _resolve_path_from_env("DB_WALLET_DIR", "TNS_ADMIN")
+    wallet_password = os.getenv("DB_WALLET_PASSWORD") or os.getenv("WALLET_PASSWORD")
 
-    pool = oracledb.create_pool(
-        user=_required_env("DB_USER"),
-        password=_required_env("DB_PASSWORD"),
-        dsn=_required_env("DB_DSN"),
-        config_dir=str(wallet_dir),
-        wallet_location=str(wallet_dir),
-        wallet_password=wallet_password,
-        min=1,
-        max=10,
-        increment=1,
-    )
+    app.config["SQLALCHEMY_DATABASE_URI"] = "oracle+oracledb://"
 
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "connect_args": {
+            "user": _required_env("DB_USER"),
+            "password": _required_env("DB_PASSWORD"),
+            "dsn": _required_env("DB_DSN"),
+            "wallet_location": str(wallet_dir),
+            "wallet_password": wallet_password,
+        }
+    }
 
-def get_connection():
-    if pool == None:
-        raise RuntimeWarning("Database connection pool has not been initialized yet")
-    else:
-        return pool.acquire()
-    
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-def test_db_connection():
-    try:
-        with get_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT 1 FROM DUAL")
-                result = cursor.fetchone()
-
-        return True, result[0]
-
-    except Exception as error:
-        return False, str(error)
+    db.init_app(app)

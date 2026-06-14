@@ -1,18 +1,14 @@
-from database import init_db_pool, test_db_connection
+from flask import Flask
+from database import configure_database
+from routes.expenses import expenses_bp
 
+
+app = Flask(__name__)
+
+configure_database(app)
+
+app.register_blueprint(expenses_bp)
 
 
 if __name__ == "__main__":
-    try:
-        init_db_pool()
-
-        connected, result = test_db_connection()
-
-        if connected:
-            print("Database connected successfully:", result)
-        else:
-            print("Database connection failed:", result)
-
-    except Exception as error:
-        print("Application startup failed:")
-        print(error)
+    app.run(debug=True)

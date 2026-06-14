@@ -1,3 +1,8 @@
+from flask import Blueprint
+expenses_bp = Blueprint("expenses", __name__)
+from database_services.expenses_helper import get_expenses_for_group
+
+
 #note : still learning flask, i'll write pseudo code, translation to be done later 
 
 # POST /groups/<group_id>/expenses
@@ -8,8 +13,9 @@
     # return sucess with the new expense's id
 
 # GET /groups/<group_id>/expenses
-    # call expense_service.get_expenses_for_group()
-    # return sucess with the list of expenses
+@expenses_bp.get("/groups/<int:group_id>/expenses")
+def get_group_expenses_route(group_id):
+    return get_expenses_for_group(group_id)
 
 # GET /expenses/<expense_id>
     # call expense_service.get_expense()

@@ -1,4 +1,4 @@
-from flask import jsonify
+from decimal import Decimal, InvalidOperation
 from database import db
 from database_services.models import AppUser, Expense, ExpenseGroup, Membership
 from datetime import datetime, timezone
@@ -114,7 +114,7 @@ def get_expenses_for_group(group_id):
             }
         )
 
-    return jsonify(result), 200
+    return result
     
 
 def update_expense(expense_id, data):

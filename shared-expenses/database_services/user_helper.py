@@ -82,7 +82,8 @@ def create_user(data):
 
     if existing_user is not None:
         raise ValueError("email already exists")
-
+    ## comment_houssam: Regarding the case sensitivity issue, i suggest we start by adding the email after making it all lower case.
+    ## the comparison will be unified then by making sure to do a lower case tranforamtion before any comparison.
     user = AppUser(
         username=username,
         email=email,

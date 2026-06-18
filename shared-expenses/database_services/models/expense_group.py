@@ -22,6 +22,12 @@ class ExpenseGroup(db.Model):
         db.String(255),
         nullable=False,
     )
+    
+    deleted_at = db.Column(
+        "DELETED_AT",
+        db.DateTime,
+        nullable=True,
+    )
 
     memberships = db.relationship(
         "Membership",

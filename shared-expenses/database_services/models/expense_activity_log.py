@@ -1,5 +1,5 @@
 from database import db, SCHEMA_NAME
-from sqlalchemy import Identity
+from sqlalchemy import Identity, func
 
 
 class ExpenseActivityLog(db.Model):
@@ -36,8 +36,22 @@ class ExpenseActivityLog(db.Model):
         db.String(255),
         nullable=True,
     )
+    
+    created_at = db.Column(
+        "CREATED_AT",
+        db.DateTime,
+        nullable=False,
+        server_default=func.current_timestamp(),
+    )
+    old_value = db.Column(
+        "OLD_VALUE",
+        db.Numeric(10, 2),
+        nullable=True,
+    )
 
     expense = db.relationship(
         "Expense",
         back_populates="activity_logs",
     )
+
+

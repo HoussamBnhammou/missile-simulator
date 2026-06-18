@@ -28,6 +28,7 @@ def settle_split(expense_id, user_id):
     # i havn't seen setteled_at in any table in the schema
     # so can't really tell how it will be 
     # flag that the debt has been paid 
+    ##comment_houssam: there will be no action of settling, the settling itself is the fact of paying the peeson you, then you just need to add an expense that includes the settled amount and that's it.
     return
 
 def update_splits(expense_id, participants):

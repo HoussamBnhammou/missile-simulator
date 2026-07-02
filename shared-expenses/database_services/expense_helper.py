@@ -99,11 +99,9 @@ def get_expenses_for_group(group_id):
                 "id": int(expense.id),
                 "group_id": int(expense.membership.group_id),
                 "membership_id": int(expense.membership_id),
-                "paid_by": {
-                    "user_id": int(expense.membership.user.id),
-                    "username": expense.membership.user.username,
-                    "email": expense.membership.user.email,
-                },
+                "user_id": int(expense.membership.user.id),
+                "username": expense.membership.user.username,
+                "email": expense.membership.user.email,
                 "expense": float(expense.expense),
                 "created_at": expense.created_at.isoformat()
                 if expense.created_at

@@ -60,8 +60,3 @@ class ExpenseParticipant(db.Model):
         back_populates="participants",
     )
 
-    splits = db.relationship(
-        "ExpenseSplit",
-        back_populates="participant",
-        cascade="all, delete-orphan",
-    )

@@ -27,6 +27,16 @@ class Expense(db.Model):
         nullable=False,
     )
 
+    paid_by = db.Column(
+        "PAID_BY",
+        db.Numeric(38, 0),
+        db.ForeignKey(
+            f"{SCHEMA_NAME}.MEMBERSHIP.ID",
+            name="FK_EXPENSES_MEMBERSHIP",
+        ),
+        nullable=False,
+    )
+
     expense = db.Column(
         "EXPENSE",
         db.Numeric(10, 2),

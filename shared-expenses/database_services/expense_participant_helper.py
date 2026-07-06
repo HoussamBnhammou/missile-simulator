@@ -1,5 +1,5 @@
 from database import db
-from database_services.models import AppUser, Membership, ExpenseParticipant
+from database_services.models import AppUser, Membership, ExpenseParticipant, ExpenseGroup, Expense
 
 # the database and models are confusing
 # it give the impression that there 2 tables, one to track who participated and one for who owes what 
@@ -64,6 +64,35 @@ def get_participants_for_group(group_id):
     # used by the balances calculation 
     # return a list of split dictionaries
     # conceptually : must return who paid, who owes, how much
+
+    if group_id is None:
+        raise ValueError("group_id is required")
+    
+    expenses_per_group =   (
+        db.session.query(Expense)
+        .join(Membership, Expense.membership_id == Membership.id)
+        .join(ExpenseGroup, Membership.group_id == ExpenseGroup.id)
+        .join(AppUser, Membership.user_id == AppUser.id)
+        .filter(Membership.group_id == group_id)
+        .filter(Expense.deleted_at.is_(None))
+        .order_by(Expense.created_at.desc())
+        .all()
+    )
+
+    participants = (db.session.query(ExpenseParticipant)
+                    .join(Membership, ExpenseParticipant.membership_id == Membership.id)
+                    .join(ExpenseGroup, Membership.group_id == ExpenseGroup.id)
+                    .filter(Membership.group_id == group_id)
+                    .all()
+                    )
+
+    for expense_per_group  in expenses_per_group:
+        
+
+
+
+
+
     return
 
 def settle_split(expense_id, user_id):
@@ -77,6 +106,40 @@ def update_participants(expense_id, participants):
     # delete existing participants for this expense_id ?
     # re-insert with the new participants list
     # do smt to make sure it's atomic — either both happen or none of them happen 
-    return
+    if expense_id is None:
+        raise ValueError("expense_id is required")
+    if participants is None or participants == []:
+        raise ValueError("participants are required")
+    participant_ids = []
+
+    for participant in participants:
+      
+        participant_row = (
+            db.session.query(ExpenseParticipant)
+            .filter(ExpenseParticipant.membership_id == participant.membership_id)
+            .filter(ExpenseParticipant.expense_id == expense_id )
+            .first()
+        )
+
+        if participant_row is None:
+
+            participant_row = ExpenseParticipant(
+                membership_id =participant.membership_id ,
+                expense_id = participant.expense_id ,
+                shared_expense = participant.shared_expense    
+            )
+            db.session.add(participant_row)
+            db.session.commit()
+
+
+        else:
+            participant_row.shared_expense = participant.shared_expense
+            db.session.commit()
+
+        participant_ids.append(participant_row.id)
+    return participant_ids
 
 # deleting options are still dependant and the final schema design 
+
+
+

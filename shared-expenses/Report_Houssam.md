@@ -1,23 +1,15 @@
-What i did:
-Red your design concerns and applied changes accordingly to what i agreed on to be logical.
-which includes
-    removing expense_split table.
-    adding created_at timestamp for activity log
-    adding old_value for activity log to have some history.
-    adding deleted_at to expense_group to enable soft delete
-    changed the files of models  that doesn't reflect the same name of the objects.
-    the membership flag already resolved in the last work.
-    i don't think adding governance to expense group is good idea. but if we need it, we can add it in the future it won't be a problem.
+what i did:
+    while i was about to code the get splits of the group, saw there was a that the participants and the payer should be there. 
+    i had to requestion the expense table since i thought there was member_id will be the payer, but that one should be for who logged or created the expense rather then who paid, so i did add the payement.
+    so i updated the expense table to reflect that.
 
-Finished the membership helper.
-added a comment regarding the settling up function in expense participant
+    eventually i coded all necessary functions of the expense split helper, i need you to review one function specefically which is fetching all expesne particpants per group.
 
-Strugles:
+    also did some renaming for expense_participant function.
 
-Not revising enough the finished work made the lefout mistakes get back to us, have to be more vigilant from this part.
+strugles:
+we lost our db brother. i was trying to reach it so i can update the expense table, it turn out they sent me an email saying that that allocation of resources was temporal and they canceled my account. unless i pay.
 
-Next step: 
-
-start to think about the calculations that should be done to know what each person owes to the other. (maybe think about it lightly)
-
-participant_split_helper if you didn't do it by the time i start working.
+Next step:
+    i suggest we ignore the adb problem and we proceed with coding since we have a diagram that reflect the schema status we need to have.
+    will search on the side a free db provider if i coudn'd find it we go 127.0.0.1

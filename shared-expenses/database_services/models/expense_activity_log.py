@@ -49,9 +49,23 @@ class ExpenseActivityLog(db.Model):
         nullable=True,
     )
 
+    membership_id = db.Column(
+        "MEMBERSHIP_ID",
+        db.Numeric(38, 0),
+        db.ForeignKey(
+            f"{SCHEMA_NAME}.MEMBERSHIP.ID",
+            name="FK_EXPENSE_PARTICIPANTS_MEMBERSHIP",
+        ),
+        nullable=False,
+    )
+
     expense = db.relationship(
         "Expense",
         back_populates="activity_logs",
     )
 
+    membership = db.relationship(
+        "Membership",
+        back_populates="activity_logs",
+    )
 

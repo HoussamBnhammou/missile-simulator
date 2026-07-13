@@ -65,35 +65,42 @@ def get_participants_for_group(group_id):
     # return a list of split dictionaries
     # conceptually : must return who paid, who owes, how much
 
+    ###Flag####
+        #this is the most heavy fetch we are doing on this app, i had to make sure we do it in an efficient way, for now complexity is query_time + nlog(n) where n is the returned rows of the query.
+        # the query has 3 joints but it's the only way so i can do an efficient data manipulation after.
+        # the results will be returned in the following format that exist in the end of the page __look__below__
+
+
     if group_id is None:
         raise ValueError("group_id is required")
     
-    expenses_per_group =   (
+    expenses_participants_per_group =   (
         db.session.query(Expense)
         .join(Membership, Expense.membership_id == Membership.id)
         .join(ExpenseGroup, Membership.group_id == ExpenseGroup.id)
-        .join(AppUser, Membership.user_id == AppUser.id)
+        .join(ExpenseParticipant, Expense.id ==ExpenseParticipant.expense_id)
         .filter(Membership.group_id == group_id)
         .filter(Expense.deleted_at.is_(None))
         .order_by(Expense.created_at.desc())
         .all()
     )
 
-    participants = (db.session.query(ExpenseParticipant)
-                    .join(Membership, ExpenseParticipant.membership_id == Membership.id)
-                    .join(ExpenseGroup, Membership.group_id == ExpenseGroup.id)
-                    .filter(Membership.group_id == group_id)
-                    .all()
-                    )
 
-    for expense_per_group  in expenses_per_group:
-        
+    results = {}
+    for expense_participants_per_group  in expenses_participants_per_group:
+        if expense_participants_per_group.id in results:
+            results[expense_participants_per_group.id].participants.append({ expense_participants_per_group.participants.membership_id :  expense_participants_per_group.participants.shared_expense })
+        else:
+            results[expense_participants_per_group.id] = {
+                "payer" : expense_participants_per_group.paid_by,
+                "price"      : expense_participants_per_group.expense,
+                "participants": [{expense_participants_per_group.participants.membership_id :  expense_participants_per_group.participants.shared_expense}]
+            }
+    return results
 
 
 
 
-
-    return
 
 def settle_split(expense_id, user_id):
     # i havn't seen setteled_at in any table in the schema
@@ -143,3 +150,30 @@ def update_participants(expense_id, participants):
 
 
 
+
+## comment about the format of the result while fetching exepense participant per groups
+# results = {
+#     expense_id_1: {
+#         "payer": payer_membership_id,
+#         "price": expense_amount,
+#         "participants": [
+#             {
+#                 participant_1_membership_id: participant_1_shared_expense,
+#                 participant_2_membership_id: participant_2_shared_expense,
+#                 # ...
+#             }
+#         ],
+#     },
+#     expense_id_2: {
+#         "payer": payer_membership_id,
+#         "price": expense_amount,
+#         "participants": [
+#             {
+#                 participant_1_membership_id: participant_1_shared_expense,
+#                 participant_2_membership_id: participant_2_shared_expense,
+#                 # ...
+#             }
+#         ],
+#     },
+#     # ...
+# }

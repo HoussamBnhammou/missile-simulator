@@ -1,15 +1,7 @@
 what i did:
-    while i was about to code the get splits of the group, saw there was a that the participants and the payer should be there. 
-    i had to requestion the expense table since i thought there was member_id will be the payer, but that one should be for who logged or created the expense rather then who paid, so i did add the payement.
-    so i updated the expense table to reflect that.
+    Added expense activity log helper, and edited it's database table to include memberhip_id so each activity is linked with the user who did it.
 
-    eventually i coded all necessary functions of the expense split helper, i need you to review one function specefically which is fetching all expesne particpants per group.
+strugles: 
+    the mistakes i made in design are eating me up, when building now, for example, we didn't add a name attribute for each expense, now in the activity message i am refering to each expense that has been added, deleted or editited by it's id instead of a name, which is not user friendly.
 
-    also did some renaming for expense_participant function.
-
-strugles:
-we lost our db brother. i was trying to reach it so i can update the expense table, it turn out they sent me an email saying that that allocation of resources was temporal and they canceled my account. unless i pay.
-
-Next step:
-    i suggest we ignore the adb problem and we proceed with coding since we have a diagram that reflect the schema status we need to have.
-    will search on the side a free db provider if i coudn'd find it we go 127.0.0.1
+Next step: didn't had time to think of what's next, i was zoomed in the code, tomorrow at the start of the session i will think about what should i do, unless you have an idea.

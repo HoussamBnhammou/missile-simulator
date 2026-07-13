@@ -1,6 +1,6 @@
 from flask import Blueprint
 expenses_bp = Blueprint("expenses", __name__)
-from database_services.expenses_helper import get_expenses_for_group
+from database_services.expense_helper import get_expenses_for_group
 
 
 #note : still learning flask, i'll write pseudo code, translation to be done later 

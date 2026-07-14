@@ -1,7 +1,14 @@
 what i did:
-    Added expense activity log helper, and edited it's database table to include memberhip_id so each activity is linked with the user who did it.
+    since you mentioned the struggle of testing, i also think building more code without testing on this point will make it very chaotic, we need to test each service we add now and to do that we need an end to end implemntation, which include the db also.
+    that's why i sacrificed this hour to add a local databasae that can easily be run  from each person's laptop. i dockerised and added it to a folder with the infromation needed for it, to start it up you just need to run the start script existing there.
+    made sure to update the databse service so it can support this local postgres db, it reflect the same credential that we use to create it.
+    i will leave the env files exposed in the repo, since the db is local now, nothing to worry about, and we will save oursevles from the hustle of sending these credentials on what's app.
 
 strugles: 
-    the mistakes i made in design are eating me up, when building now, for example, we didn't add a name attribute for each expense, now in the activity message i am refering to each expense that has been added, deleted or editited by it's id instead of a name, which is not user friendly.
+    making things work locally can be a stubborn specially using work laptop hwere they restric using some images :/ but postgres worked eventually, and i def think it will work for you too.
+    have no idea on how to visualide the db since i was only using sqldevlopper which is not natively compatible with postgres.
 
-Next step: didn't had time to think of what's next, i was zoomed in the code, tomorrow at the start of the session i will think about what should i do, unless you have an idea.
+Next step: 
+
+    i need to add in the app the feature of writing the whole schema and tables using sqlalchemy create option, and from there we are all set from the database side.
+    aside from that i will see what you will do tmorrow on routes and pick up from there to help.

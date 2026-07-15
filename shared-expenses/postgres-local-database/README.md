@@ -29,6 +29,10 @@ docker compose logs -f postgres-db
 
 Wait until its status reports `healthy`.
 
+On the first startup, the container creates the application database and user,
+then applies `init/bootstrap.sql` to create the application schema and tables.
+The schema defaults to `shared_expenses` and can be changed with `APP_SCHEMA`.
+
 ## Stop and restart
 
 Stop without deleting the database:
@@ -58,6 +62,8 @@ docker compose down -v
 > The initialization script runs only when the data volume is empty. If you change
 > the database name, user, or passwords after the first startup, run
 > `docker compose down -v` before starting again. This deletes existing data.
+> The same applies after changing `init/bootstrap.sql`: initialization scripts run
+> only against a new, empty data volume.
 
 
 ## Database administration

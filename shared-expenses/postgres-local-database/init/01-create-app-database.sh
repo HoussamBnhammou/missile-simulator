@@ -4,6 +4,7 @@ set -eu
 : "${APP_DB:?APP_DB is required}"
 : "${APP_USER:?APP_USER is required}"
 : "${APP_PASSWORD:?APP_PASSWORD is required}"
+: "${APP_SCHEMA:=shared_expenses}"
 
 psql   --username "$POSTGRES_USER"   --dbname "$POSTGRES_DB"   --set=ON_ERROR_STOP=1   --set=app_db="$APP_DB"   --set=app_user="$APP_USER"   --set=app_password="$APP_PASSWORD" <<'SQL'
 SELECT format(
@@ -33,3 +34,11 @@ SELECT format(
 )
 \gexec
 SQL
+
+psql \
+  --username "$APP_USER" \
+  --dbname "$APP_DB" \
+  --set=ON_ERROR_STOP=1 \
+  --set=app_schema="$APP_SCHEMA" \
+  --set=app_user="$APP_USER" \
+  --file /opt/bootstrap.sql

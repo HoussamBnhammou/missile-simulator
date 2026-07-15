@@ -1,8 +1,8 @@
 services:
   postgres-db:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: postgres-local-database/Dockerfile
     container_name: postgres-local-db
     environment:
       POSTGRES_USER: ${POSTGRES_ADMIN_USER}
@@ -11,6 +11,7 @@ services:
       APP_DB: ${APP_DB}
       APP_USER: ${APP_USER}
       APP_PASSWORD: ${APP_PASSWORD}
+      APP_SCHEMA: ${APP_SCHEMA:-shared_expenses}
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
